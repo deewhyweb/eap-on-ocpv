@@ -1,0 +1,10 @@
+# Placeholder Group
+[demo]
+
+# jboss Group
+[jboss]
+a25fb3f06629240dd8bc4e2b606a6b0b-834740741.us-east-2.elb.amazonaws.com ansible_user=cloud-user ansible_port=22000
+
+
+[demo:children]
+jboss

@@ -1,0 +1,21 @@
+---
+- name: "Ru pre-requisites"
+  hosts: jboss
+  become: true
+  collections:
+    - community.general
+  tasks:
+    - name: Register as user with password and auto-subscribe to available content.
+      community.general.redhat_subscription:
+        state: present
+        username: "{{ username }}"
+        password: "{{ password }}"
+        auto_attach: true
+    - name: Mount postgres secret
+      ansible.posix.mount:
+        path: /home/cloud-user/postgres
+        src: /dev/sda
+        fstype: iso9660
+        state: mounted
+        boot: False
+        opts: ro

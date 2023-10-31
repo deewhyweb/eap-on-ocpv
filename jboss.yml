@@ -1,0 +1,41 @@
+---
+- name: "Deploy a JBoss EAP instance"
+  hosts: jboss
+  become: true
+  vars:
+    eap_apply_cp: true
+    eap_version: 7.4.0
+    eap_offline_install: false
+    eap_config_base: 'standalone-full-ha.xml'
+    eap_driver_module_name: 'org.postgresql'
+    eap_driver_version: 9.4.1212
+    eap_driver_jar_filename: "postgresql-{{ eap_driver_version }}.jar"
+    eap_driver_jar_url: "https://repo.maven.apache.org/maven2/org/postgresql/postgresql/{{ eap_driver_version }}/{{ eap_driver_jar_filename }}"
+    eap_enable_yml_config: True
+    eap_yml_configs:
+      - eap_configuration.yml.j2
+  collections:
+    - redhat.eap
+  roles:
+    - eap_install
+    - eap_systemd
+  pre_tasks:
+    - name: extract password from file
+      shell: cat /home/cloud-user/postgres/database-password
+      register: dbpassword   
+    - name: extract username from file
+      shell: cat /home/cloud-user/postgres/database-user
+      register: dbuser
+    - name: extract database name from file
+      shell: cat /home/cloud-user/postgres/database-name
+      register: dbname
+  tasks:
+    - name: "Set up for JBoss module"
+      include_role:
+        name: eap_driver
+    - name: "Reload before deploy"
+      include_role:
+        name: eap_utils
+        tasks_from: jboss_cli.yml
+      vars:
+        jboss_cli_query: ":reload"

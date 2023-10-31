@@ -1,0 +1,21 @@
+---
+- name: "Deploy a JBoss EAP Application"
+  hosts: jboss
+  become: true
+  vars:
+    app:
+      name: 'addressbook.war'
+      url: 'https://gpte-public.s3.amazonaws.com/addressbook.war'
+  collections:
+    - redhat.eap
+  tasks:
+    - name: "Ensures webapp {{ app.name }} has been retrieved from {{ app.url }}"
+      get_url:
+        url: "{{ app.url }}"
+        dest: "/opt/jboss_eap/jboss-eap-7.4/{{ app.name }}"
+    - name: "Deploy webapp"
+      include_role:
+        name: eap_utils
+        tasks_from: jboss_cli.yml
+      vars:
+        jboss_cli_query: "'deploy --force /opt/jboss_eap/jboss-eap-7.4/{{ app.name }}'"
